@@ -25,36 +25,71 @@ MENU = {
 }
 
 resources = {
-    "water": 300,
+    "water": 0,
     "milk": 200,
     "coffee": 100,
+    "money": 0
 }
 
 is_on = True
 
-while is_on:
-    coffee = input("What would you like? (espresso/latte/cappuccino): ")
 
-    if coffee == "report":
-        print(f"Water: {resources['water']}ml")
-        print(f"Milk: {resources['milk']}ml")
-        print(f"Coffee: {resources['coffee']}g")
-        print(f"Money: ${resources['money']}")
+def get_report():
+    print(f"Water: {resources['water']}ml")
+    print(f"Milk: {resources['milk']}ml")
+    print(f"Coffee: {resources['coffee']}g")
+    print(f"Money: ${resources['money']}")
 
-    if coffee == "off":
-        is_on = False
 
+def is_resources_enough(chosen_drink, order_ingredients):
+    for ingredient in order_ingredients:
+        if order_ingredients[ingredient] >= resources[ingredient]:
+            print(f"Sorry there is not enough {ingredient}.")
+            return False
+    return True
+
+
+def get_payment():
     print("Please insert coins.")
     quarters = int(input("how many quarters?: "))
     dimes = int(input("how many dimes?: "))
     nickles = int(input("how many nickles?: "))
     pennies = int(input("how many pennies?: "))
 
-    amount = quarters * 0.25 + dimes * 0.1 + nickles * 0.05 + pennies * 0.01
-    change = amount - MENU[f"{coffee}"]["cost"]
+    return quarters * 0.25 + dimes * 0.1 + nickles * 0.05 + pennies * 0.01
 
-    print(f"Here is ${change} in change.")
-    print("Here is your latte ☕️. Enjoy!")
+
+def is_transaction_successful(paid, drink_cost):
+    if paid >= drink_cost:
+        change = round(amount - MENU[f"{coffee}"]["cost"], 2)
+        print(f"Here is ${change} in change.")
+        print("Here is your latte ☕️. Enjoy!")
+        resources["money"] += drink_cost
+        return True
+    else:
+        print("Sorry that's not enough money. Money refunded.")
+        return False
+
+
+def make_coffee(order_ingredients):
+    for ingredient in order_ingredients:
+        resources[ingredient] -= order_ingredients[ingredient]
+
+
+while is_on:
+    coffee = input("What would you like? (espresso/latte/cappuccino): ")
+
+    if coffee == "off":
+        is_on = False
+    elif coffee == "report":
+        get_report()
+    else:
+        ingredients = MENU[coffee]["ingredients"]
+        if is_resources_enough(coffee, ingredients):
+            amount = get_payment()
+            cost = MENU[f"{coffee}"]["cost"]
+            if is_transaction_successful(amount, cost):
+                make_coffee(ingredients)
 
 # TODO 1. Prompt user by asking “What would you like? (espresso/latte/cappuccino):”
 # a. Check the user’s input to decide what to do next.
